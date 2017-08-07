@@ -6,4 +6,4 @@ RUN apk update && \
 
 ADD shmig /bin/shmig
 
-ENTRYPOINT ["shmig"]
+CMD ["shmig"]
