@@ -9,6 +9,7 @@
 ME="${0##*[/\\]}"
 CONFIG="./shmig.conf"
 SCHEMA_TABLE="shmig_version"
+SCHEMA="public"
 CONFIG_EXPLICITLY_SET="0"
 ASK_PASSWORD="0"
 MIGRATIONS="./migrations"
@@ -271,7 +272,7 @@ EOF
 ##### PostgreSQL
 
 postgresql_cli(){
-  export PGOPTIONS="-c client_min_messages=WARNING"
+  export PGOPTIONS="-c client_min_messages=WARNING -c search_path=$SCHEMA"
   local args="-q -X -v VERBOSITY=terse -v ON_ERROR_STOP=1 -A -t -w -d $DATABASE $ARGS"
 
   [[ -n $LOGIN    ]] && args="-U $LOGIN    $args"
@@ -289,8 +290,8 @@ postgresql_cli(){
 
 postgresql_check(){
   __generic_checker "$PSQL" \
-    "select table_name from information_schema.tables where table_schema = 'public';" \
-    "create table \"$SCHEMA_TABLE\"(version int not null primary key, migrated_at timestamp not null default (now() at time zone 'utc'));"
+    "select table_name from information_schema.tables where table_schema = '$SCHEMA';" \
+    "create table $SCHEMA.$SCHEMA_TABLE(version int not null primary key, migrated_at timestamp not null default (now() at time zone 'utc'));"
 }
 
 postgresql_previous_versions(){
